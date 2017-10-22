@@ -128,12 +128,8 @@ def augment_images(image_generator):
             flip = np.random.choice([True, False])
 
             if flip:
-                image[i] = tf.image.flip_left_right(image[i]).eval()
-                label[i] = tf.image.flip_left_right(label[i]).eval()
-
-                # np.fliplr(img[:, :, 0])
-
-            image[i] = tf.image.random_brightness(image[i], 0.2).eval()
+                image[i] = np.fliplr(image[i])
+                label[i] = np.fliplr(label[i])
 
         yield image, label
 
@@ -161,10 +157,10 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
         print("Epoch %d/%d" % (e, epochs))
         loss_a = []
 
-        # if test:
-        img_generator = get_batches_fn(batch_size)
-        # else:
-        #     img_generator = augment_images(get_batches_fn(batch_size))
+        if test:
+            img_generator = get_batches_fn(batch_size)
+        else:
+            img_generator = augment_images(get_batches_fn(batch_size))
 
         for image, label in img_generator:
             _, loss = sess.run([train_op, cross_entropy_loss], feed_dict={input_image: image, correct_label: label, learning_rate: 0.0002, keep_prob: 0.5})
